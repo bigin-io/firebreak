@@ -89,14 +89,20 @@ anti-patterns that produced measured false all-clears, and the technique for que
 
 ## Output
 
-**Verdict first, one line.** Then findings ranked by exposure, worst first.
+**Verdict first, one line, carrying the worst severity found.** Then findings ranked by
+severity, worst first.
+
+```
+🔴 CRITICAL — do not merge: the retry path charges real cards with idempotency disabled.
+🟢 CLEAN — no cost risk; the charge path moved verbatim with its idempotency key intact.
+```
 
 **Budget: under 200 words per finding, under 400 for a typical review.** A reader decides in
 the first fifteen seconds whether to keep reading, and length spends that. Everything you cut
 is available on request anyway.
 
 ```
-### <one-line claim> — `path/from/repo/root.go:123`
+### 🔴 CRITICAL — <one-line claim> — `path/from/repo/root.go:123`
 
 <Mechanism. 2–4 sentences: what triggers the spend, what bounds it, why the bound fails.>
 
@@ -177,6 +183,36 @@ caught. Say what would detect this and how long that takes.
 
 If the answer is *"an invoice, next month"* — or worse, *"the existing alert cannot see this
 shape"* — that belongs in the first three lines of the finding, not in a closing caveat.
+
+### Severity is computed, never assigned
+
+| | |
+|---|---|
+| 🔴 **CRITICAL** | Unbounded **and** irreversible — money leaves an account, or a message reaches a real person |
+| 🟠 **HIGH** | Unbounded and reversible · or bounded above the material threshold and irreversible |
+| 🟡 **MEDIUM** | Bounded above the material threshold · or a bound you cannot confirm exists |
+| 🔵 **LOW** | Bounded below the material threshold |
+| 🟢 **CLEAN** | No finding |
+
+**Unbounded** means nothing *in code* stops it — the same judgement the Exposure line already
+makes. **Irreversible** means the effect cannot be undone by a revert: a charge, a sent message,
+a deleted record. A refund is not a revert.
+
+**Material threshold** is `material_threshold` in `.firebreak/catalog.md`, default **$1,000 per
+incident**. A team that ships a $50 mistake weekly and a team where $50 is noise need different
+lines, and neither belongs in this file.
+
+Three rules that keep this honest. The predecessor severity model was withdrawn for breaking all
+three:
+
+1. **Ignorance never escalates.** *"I cannot determine whether a bound exists"* caps at 🟡
+   MEDIUM and never reaches 🔴. A construct you do not understand is not evidence of disaster.
+2. **An unknown multiplier is not unboundedness.** If a bound exists in code and you simply
+   cannot size the population, the finding is **bounded** — severity comes from the ceiling
+   estimate, not from your uncertainty.
+3. **Severity never replaces the money.** Both appear, always. The emoji is a scannable index
+   into the Exposure line, not a substitute for it. If you reach for a severity because the
+   number felt unimpressive, the number was the honest answer.
 
 ### Compression rules
 

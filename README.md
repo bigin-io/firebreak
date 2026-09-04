@@ -23,25 +23,15 @@ git clone https://github.com/bigin-io/firebreak
 cp -r firebreak/skills/firebreak ~/.claude/skills/firebreak
 ```
 
-## `bulkhead` — the security sibling
+## Use
 
-```
-bulkhead <branch>
-```
+In a Claude Code session in the repository you want reviewed:
 
-Same method, different question: **what does this expose, to whom, and does the control between
-them actually hold?** It reports *reachability* — "an unauthenticated internet caller can POST a
-topic containing `169.254.169.254` and reach the cloud metadata endpoint" — rather than a CVSS
-score, because a rating assigned from a matrix inflates on uncertainty and tells a reader
-nothing they can check.
-
-The two overlap on purpose: **the construct that bounds spend is usually the construct that
-bounds reach.** Firebreak found a live SSRF and a PII leak while pricing things, because you
-cannot ask "how big is this payload" without learning what is in it.
-
-⚠️ **Bulkhead's rules are inherited from Firebreak, not measured.** Firebreak's were each
-written after a run failed in that exact way; Bulkhead's are transplanted and reasoned about.
-Treat its findings accordingly, and do not gate a build on it yet.
+| You want | Say |
+|---|---|
+| Check what you're about to commit | `firebreak` |
+| Review a branch or PR | `firebreak <branch>` |
+| Gate CI | Non-interactive with `--ci` — read [`ci.md`](skills/firebreak/ci.md) first |
 
 ## Set up a repository (optional, one-off)
 
@@ -67,18 +57,7 @@ within a week — and then the repository has no coverage while everyone believe
 Setup will say so before wiring one up, and will still wire it up if you want it.
 
 It writes only configuration — the catalog and whichever trigger you choose — and never touches
-source. Skip the whole thing if you like; Firebreak works without it, and unpriced vendors are
-still reported, just without a dollar figure.
-
-## Use
-
-In a Claude Code session in the repository you want reviewed:
-
-| You want | Say |
-|---|---|
-| Check what you're about to commit | `firebreak` |
-| Review a branch or PR | `firebreak <branch>` |
-| Gate CI | Non-interactive with `--ci` — read [`ci.md`](skills/firebreak/ci.md) first |
+source. Skip the whole thing if you like; Firebreak works without it.
 
 ## What it looks for
 
@@ -142,6 +121,26 @@ a real bug. The first is the costliest: *"the sink isn't in this codebase, so th
 A service can drive spend it never calls — it returns the work list, sets the eligibility, holds
 the counter, or feeds the queue that another system sends from.
 
+## `bulkhead` — the security sibling
+
+```
+bulkhead <branch>
+```
+
+The same three questions, pointed at a different one: **what does this expose, to whom, and
+does the control between them actually hold?** It reports *reachability* — "an unauthenticated
+internet caller can POST a topic containing `169.254.169.254` and reach the cloud metadata
+endpoint" — rather than a CVSS score, because a rating assigned from a matrix inflates on
+uncertainty and tells a reader nothing they can check.
+
+The two overlap on purpose: **the construct that bounds spend is usually the construct that
+bounds reach.** Firebreak found a live SSRF and a PII leak while pricing things, because you
+cannot ask "how big is this payload" without learning what is in it.
+
+**Bulkhead's rules are inherited, not measured.** Firebreak's detection rules were each
+written after a run failed in that exact way; Bulkhead's are transplanted and reasoned about.
+Treat its findings accordingly, and do not gate a build on it yet.
+
 ## CI
 
 Three exit codes: `0` clean, `1` new blocking finding, `2` tool error — which **passes the
@@ -152,17 +151,18 @@ Findings are fingerprinted on `mechanism + path + enclosing symbol`, never line 
 they survive reformatting and neighbouring edits. Only fingerprints absent from a committed
 baseline can fail a build.
 
-**`block_at` defaults to `none`.** Run advisory for at least one sprint before letting it gate
-anything. A repository adopting this has pre-existing findings; blocking on all of them means
-the first unrelated PR fails and the gate is gone by Friday.
+**`block_at` defaults to `none`.** A repository adopting this has pre-existing findings;
+blocking on all of them means the first unrelated PR fails and the gate is gone by Friday. Run
+advisory for at least one sprint, and read the first two [honest limits](#honest-limits) before
+moving it.
 
 ## Honest limits
 
 - **Precision is unmeasured on your repository.** Validation was a small number of runs against
-  one known defect in one codebase. Hence the advisory default.
+  one known defect in one codebase.
 - **Reproducibility is good, not proven.** Three runs of the same branch produced the same
   finding, anchor and price. Stability on a *marginal* finding — one near the reporting
-  threshold — is untested. Re-check before moving `block_at` off `none`.
+  threshold — is untested.
 - **Unit costs go stale.** [`catalog.md`](skills/firebreak/catalog.md) records rates observed on
   a date, with the caveats. Treat it as needing a scheduled refresh, not as ground truth.
 - **It sends source to an LLM.** It runs inside Claude Code, so this is the data flow you

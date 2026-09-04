@@ -89,23 +89,65 @@ anti-patterns that produced measured false all-clears, and the technique for que
 
 ## Output
 
-Findings ranked by money at risk, worst first. For each:
+**Verdict first, one line.** Then findings ranked by exposure, worst first.
 
-- `file:line` — **repo-relative path from the repository root**, not from a module or package
-  root, anchored to a **changed** line. A path the reader cannot paste into an editor is a
-  path they will not check.
-- **Mechanism** — what triggers the operation, what bounds it, why the bound can fail. In
-  prose, specific to this code. Not a rule name.
-- **Money** — a range with arithmetic, or an explicit "not derivable from static analysis,
-  because…"
-- **Fix** — concrete and minimal.
-- **Confidence** — and what you would need to check to raise it.
+**Budget: under 200 words per finding, under 400 for a typical review.** A reader decides in
+the first fifteen seconds whether to keep reading, and length spends that. Everything you cut
+is available on request anyway.
 
-Then a one-line verdict.
+```
+### <one-line claim> — `path/from/repo/root.go:123`
 
-**Reporting nothing is a valid, useful result.** Most changes carry no cost risk. A review
-that manufactures a concern to look thorough is worse than useless: it trains people to skip
-the next one. Never inflate a marginal finding to fill a report.
+<Mechanism. 2–4 sentences: what triggers the spend, what bounds it, why the bound fails.>
+
+**Exposure:** <ceiling, not unit rate — see below>
+**Time to notice:** <what catches this, and how long it takes>
+**Fix:** <one line>
+**Unknown:** <only what would change the verdict>
+```
+
+Paths are **repo-relative from the repository root**, not from a module root, anchored to a
+**changed** line. A path the reader cannot paste into an editor is a path they will not check.
+
+### Exposure is a ceiling, not a rate
+
+A unit rate reads as trivial and buries the risk. *"$4.45 per client per year"* is accurate and
+tells the reader nothing about whether to panic.
+
+Lead with the worst case, and name what bounds it:
+
+- **Unbounded** when nothing in code stops it. Say the word — it is the single most important
+  fact in the finding.
+- **Bounded at $X** when something does — and name the bound.
+- The unit rate is supporting detail. Give it once.
+
+**If the repository records a prior incident of this shape** (`.firebreak/catalog.md`), lead
+with that instead: *"this shape cost $1,600 and ran 36 hours"* beats any figure you can derive,
+because it already happened here.
+
+### Time to notice decides severity
+
+A slow leak under the alarm threshold is worse than a fast spike, because the spike gets
+caught. Say what would detect this and how long that takes.
+
+If the answer is *"an invoice, next month"* — or worse, *"the existing alert cannot see this
+shape"* — that belongs in the first three lines of the finding, not in a closing caveat.
+
+### Compression rules
+
+- **Triage in one line:** `N files, M triaged out (reason)`. Never a paragraph per file.
+- **Conclusions, not derivations.** "3 segments, not 1" — not the septet arithmetic.
+- **One scenario, not three.**
+- **Say it once.** Confidence caveats live in **Unknown**. There is no closing confidence
+  section.
+- **Nothing outside the change set** — not even to say it was checked and is fine.
+- **Cut any sentence that would not change what the reader does next.**
+
+Close with: *Ask for the full trace, the arithmetic, or the alternatives considered.*
+
+**Reporting nothing is a valid, useful result.** Most changes carry no cost risk. A review that
+manufactures a concern to look thorough is worse than useless: it trains people to skip the next
+one. Never inflate a marginal finding to fill a report.
 
 ## Scope
 

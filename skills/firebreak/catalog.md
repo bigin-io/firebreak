@@ -158,6 +158,32 @@ and a circuit breaker on the completion webhook.
 billing overage, so the runaway shape is an availability outage, not an invoice.
 ```
 
+## Known incidents — the most credible number you have
+
+Rates are estimates. **A prior incident in this repository is a measurement.**
+
+If this codebase has already burned money on a shape, record it in `.firebreak/catalog.md`, and
+a finding matching that shape leads with it rather than with a derived figure:
+
+```markdown
+## Known incidents
+
+**2026-07-31 — SMS reminder runaway.** $1,600 over ~36 hours. A spend cap
+(`send_count < 4`) whose only writer was an external callback; the callback started
+failing, the counter froze, and every eligible client was re-sent on every poll.
+Fixed by claiming the row at send time instead of on callback.
+Shape: bound advanced by an independently-failing caller.
+```
+
+*"This shape cost $1,600 and ran for 36 hours before anyone noticed"* is worth more to a
+reviewer than any per-unit arithmetic. It is not an estimate, nobody can argue the multiplier,
+and it tells them what the failure actually looks like from the outside.
+
+Record: the date, the amount, how long it ran before detection, the mechanism in one sentence,
+and the shape. **Time-to-detection is the field people forget and the one that predicts the
+next incident** — a leak nobody spotted for 36 hours will not be spotted faster next time
+unless something changed.
+
 Two rules for house entries, both learned the expensive way:
 
 1. **Record the date and the source.** A contract rate quoted from memory a year later is a

@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-09-04
+
+### Changed
+
+- **Reports are now budgeted: under 200 words per finding, under 400 per review.** Measured
+  output was running 700–1,400 words for one or two findings. A reader decides in the first
+  fifteen seconds whether to keep reading, and the detail is available on request anyway. Six
+  compression rules, the load-bearing one being: cut any sentence that would not change what
+  the reader does next.
+
+- **Exposure replaces "money", and it is a ceiling rather than a rate.** A unit rate reads as
+  trivial and buries the risk — "$4.45 per client per year" is accurate and tells the reader
+  nothing about whether to panic. Findings now lead with the worst case and name what bounds
+  it, saying **unbounded** plainly when nothing in code stops it. The unit rate is supporting
+  detail, given once.
+
+- **"Time to notice" is a required field.** A slow leak under the alarm threshold is worse than
+  a fast spike, because the spike gets caught. When the answer is "an invoice, next month" — or
+  "the existing alert cannot see this shape" — that now belongs in the first three lines rather
+  than a closing caveat.
+
+### Added
+
+- **Known incidents in `.firebreak/catalog.md`.** Rates are estimates; a prior incident in the
+  repository is a measurement. A finding matching a recorded shape leads with it: "this shape
+  cost $1,600 and ran 36 hours before anyone noticed" beats any derived figure, because nobody
+  can argue the multiplier. Time-to-detection is called out as the field people forget and the
+  one that predicts the next incident.
+
 ## [1.3.0] - 2026-09-04
 
 ### Added

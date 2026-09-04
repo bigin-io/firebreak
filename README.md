@@ -7,7 +7,7 @@ burn money or cause irreversible real-world harm at scale before anyone notices?
 
 It reports in money rather than in severity words. **It reports; it never edits.**
 
-**v1.7.0** · MIT · [changelog](CHANGELOG.md)
+**v1.8.0** · MIT · [changelog](CHANGELOG.md)
 
 ## Install
 
@@ -22,6 +22,26 @@ Or copy the skill directly:
 git clone https://github.com/bigin-io/firebreak
 cp -r firebreak/skills/firebreak ~/.claude/skills/firebreak
 ```
+
+## `bulkhead` — the security sibling
+
+```
+bulkhead <branch>
+```
+
+Same method, different question: **what does this expose, to whom, and does the control between
+them actually hold?** It reports *reachability* — "an unauthenticated internet caller can POST a
+topic containing `169.254.169.254` and reach the cloud metadata endpoint" — rather than a CVSS
+score, because a rating assigned from a matrix inflates on uncertainty and tells a reader
+nothing they can check.
+
+The two overlap on purpose: **the construct that bounds spend is usually the construct that
+bounds reach.** Firebreak found a live SSRF and a PII leak while pricing things, because you
+cannot ask "how big is this payload" without learning what is in it.
+
+⚠️ **Bulkhead's rules are inherited from Firebreak, not measured.** Firebreak's were each
+written after a run failed in that exact way; Bulkhead's are transplanted and reasoned about.
+Treat its findings accordingly, and do not gate a build on it yet.
 
 ## Set up a repository (optional, one-off)
 

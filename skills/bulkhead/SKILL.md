@@ -11,6 +11,20 @@ control between them actually hold?**
 Sibling to `firebreak`, which asks the same shape of question about money. The two overlap on
 purpose — the construct that bounds spend is usually the construct that bounds reach.
 
+## Scope: pre-merge only. For a repository audit, use `bigin-appsec`.
+
+**This reviews a change set before it merges. It is not an audit, and it should never be used as
+one.** A whole-repository security review is `bigin-appsec`'s job — it carries seven language gate
+banks, an eval corpus with labelled twins and thresholds, a deterministic tier, fingerprinting and
+report renderers. None of that is reproduced here and none of it should be.
+
+A companion `bulkhead-audit` skill briefly existed and was removed in 1.11.0: it was a
+worse-engineered duplicate of `bigin-appsec`. The findings that justified it are better expressed
+as gate rules, which is where they now live — `gate-php-unreachable-guard` and
+`gate-php-route-group-no-auth` came directly from that run.
+
+**If this skill is ever extended to sweep a repository, delete it instead.**
+
 ## Read this first: these rules are inherited, not yet measured
 
 `firebreak`'s rules were each written after a measured run went wrong. **Bulkhead's are

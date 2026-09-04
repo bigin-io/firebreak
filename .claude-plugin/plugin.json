@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "firebreak",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Reviews a change set for runaway cost and irreversible real-world harm — a metered operation reachable with no working upper bound — and reports in money rather than severity words. Three surfaces: the working tree before a commit, a branch or PR under review, and a headless CI gate. Carries a money-sink catalog of observed provider unit costs (Twilio, Stripe, Anthropic, OpenAI, SES/SendGrid, S3, Maps, Algolia, Cloudflare, Mixpanel) and a review method built from a real incident. Reports; never edits. Ships with a setup skill that inventories which metered vendors a repository actually bills against and writes a catalog stub for the contractual ones, then wires up how it should be triggered — on demand, a commit-time reminder, a pre-commit hook, or a CI gate.",
   "author": {
     "name": "Tam Mai",

@@ -184,35 +184,47 @@ caught. Say what would detect this and how long that takes.
 If the answer is *"an invoice, next month"* — or worse, *"the existing alert cannot see this
 shape"* — that belongs in the first three lines of the finding, not in a closing caveat.
 
-### Severity is computed, never assigned
+### Severity is computed from the money, never assigned
 
-| | |
-|---|---|
-| 🔴 **CRITICAL** | Unbounded **and** irreversible — money leaves an account, or a message reaches a real person |
-| 🟠 **HIGH** | Unbounded and reversible · or bounded above the material threshold and irreversible |
-| 🟡 **MEDIUM** | Bounded above the material threshold · or a bound you cannot confirm exists |
-| 🔵 **LOW** | Bounded below the material threshold |
-| 🟢 **CLEAN** | No finding |
+**Severity is a function of the exposure figure and of what the spend does in the world.** Not
+of whether you found a cap.
 
-**Unbounded** means nothing *in code* stops it — the same judgement the Exposure line already
-makes. **Irreversible** means the effect cannot be undone by a revert: a charge, a sent message,
-a deleted record. A refund is not a revert.
+| Worst case | Irreversible real-world effect | Internal only |
+|---|---|---|
+| **Unbounded**, or ≥ 10× threshold | 🔴 **CRITICAL** | 🟠 **HIGH** |
+| ≥ threshold | 🟠 **HIGH** | 🟡 **MEDIUM** |
+| < threshold | 🟡 **MEDIUM** | 🔵 **LOW** |
+| No finding | 🟢 **CLEAN** | 🟢 **CLEAN** |
 
 **Material threshold** is `material_threshold` in `.firebreak/catalog.md`, default **$1,000 per
 incident**. A team that ships a $50 mistake weekly and a team where $50 is noise need different
 lines, and neither belongs in this file.
 
-Three rules that keep this honest. The predecessor severity model was withdrawn for breaking all
-three:
+**Irreversible real-world effect** means stopping the code does not undo the harm: money taken
+from someone else's account, a message a person has read, a record destroyed, external state
+changed. **The spend itself is always irreversible — that is not what this axis measures.**
+Deleting bad summaries undoes it. Un-sending a text does not.
 
-1. **Ignorance never escalates.** *"I cannot determine whether a bound exists"* caps at 🟡
+**"No cap in code" is not the same as "unbounded exposure."** A per-save geocode has no code
+cap and a real ceiling set by how often humans edit profiles. Treat it as unbounded only when
+the *realistic* worst case clears the threshold; otherwise name what actually caps it, even if
+the cap is human behaviour or table size rather than a constant.
+
+Three rules that keep this honest. **The predecessor severity model was formally withdrawn for
+breaking all three, and this one has already reproduced the failure once** — see the project's
+"defects not to reintroduce":
+
+1. **The money must move the verdict.** If a $5-per-1,000 geocode and an unbounded charge
+   against customers' cards land in the same band, the scale is broken and you should say so
+   rather than emit it. A severity that ignores the figure beside it is decoration.
+2. **Ignorance never escalates.** *"I cannot determine whether a bound exists"* caps at 🟡
    MEDIUM and never reaches 🔴. A construct you do not understand is not evidence of disaster.
-2. **An unknown multiplier is not unboundedness.** If a bound exists in code and you simply
-   cannot size the population, the finding is **bounded** — severity comes from the ceiling
-   estimate, not from your uncertainty.
-3. **Severity never replaces the money.** Both appear, always. The emoji is a scannable index
-   into the Exposure line, not a substitute for it. If you reach for a severity because the
-   number felt unimpressive, the number was the honest answer.
+3. **An unknown multiplier is not unboundedness.** If a bound exists and you simply cannot size
+   the population, severity comes from the ceiling estimate — not from your uncertainty.
+
+Severity never replaces the money. Both appear, always. The emoji is a scannable index into the
+Exposure line; if you reach for one because the number felt unimpressive, the number was the
+honest answer.
 
 ### Compression rules
 

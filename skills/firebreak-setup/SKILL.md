@@ -1,6 +1,6 @@
 ---
 name: firebreak-setup
-description: One-time setup for Firebreak in a repository. Inventories which metered third-party vendors the codebase actually bills against, separates the ones the shipped catalog already prices from the ones needing a negotiated contract rate, and writes a pre-filled .firebreak/catalog.md with the rates left blank for a human. Use when setting up Firebreak in a new repository, when asked to "set up firebreak", "add a firebreak catalog", "what does this repo spend money on", or after Firebreak reports a finding it could not price.
+description: One-time setup for Firebreak in a repository. Inventories which metered third-party vendors the codebase actually bills against and writes a pre-filled .firebreak/catalog.md with rates left blank for a human, then asks how Firebreak should be triggered — on demand, from a commit hook, or as a CI gate — and wires up the choice. Use when setting up Firebreak in a new repository, when asked to "set up firebreak", "add a firebreak catalog", "run firebreak on every commit", "add firebreak to CI", "what does this repo spend money on", or after Firebreak reports a finding it could not price.
 ---
 
 # Firebreak setup
@@ -11,7 +11,8 @@ negotiated contract, often one to three orders of magnitude more expensive.
 
 This finds what *this* repository actually spends money on, and writes a catalog stub for it.
 
-**It writes exactly one file: `.firebreak/catalog.md`. It never touches source code.**
+**It writes only configuration, and only what it names below: `.firebreak/catalog.md`, plus
+whichever trigger the user picks in step 4. It never touches source code.**
 
 ## Why this sweeps the repository when review never does
 
@@ -89,16 +90,107 @@ Source: _(who confirmed, and when)_
 For each entry that needs a rate, record **where it is called from**, so whoever fills in the
 number can see what it costs per call site.
 
-## 4. Hand it back
+## 4. Ask how it should be triggered
 
-Do not stop at writing the file. Tell the user, plainly:
+**Ask. Do not pick for them.** The right answer depends on team size, review culture, and how
+much latency people will tolerate before they route around it.
 
-1. **Which entries need a number**, and roughly who would know — contract owner, finance,
-   whoever signed the vendor.
+Present these four, with the trade-offs stated honestly — including the one that argues against
+the most obvious choice:
+
+| Option | What it costs | Wire-up |
+|---|---|---|
+| **On demand** *(recommended starting point)* | Nothing. Runs when someone types `firebreak` | No config |
+| **Commit-time reminder** | Nothing at commit time — it prompts, it does not review | A `PreToolUse` hook in `.claude/settings.json` matching `git commit` |
+| **Blocking pre-commit hook** | **Minutes per commit.** See the warning below | `.husky/pre-commit` or `.git/hooks/pre-commit` running `claude -p` |
+| **CI gate** *(the real enforcement point)* | A job per PR | `.github/workflows/firebreak.yml` |
+
+### The warning to give before they choose the pre-commit hook
+
+**A review takes minutes, not seconds.** It reads surrounding code, traces writers, and prices
+findings — that is the work, and it is why the review is any good. A hook that blocks every
+commit for several minutes gets `--no-verify`'d within a day and uninstalled within a week, and
+then the repository has *no* coverage while everyone believes it has some.
+
+Say this plainly if they ask for it. If they still want it, wire it up — it is their call — but
+default it to advisory and non-blocking, and suggest scoping it to commits that touch paths with
+known sinks rather than every commit.
+
+**Most teams should take on demand plus CI.** On demand puts it where a developer wants a second
+opinion; CI puts it where the whole team sees the result and nobody has to remember.
+
+### Wiring each one
+
+**Commit-time reminder** — add to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "grep -q 'git commit' <<< \"$CLAUDE_TOOL_INPUT\" && echo 'Consider running firebreak on these changes first.' || true"
+      }]
+    }]
+  }
+}
+```
+
+Merge into an existing `hooks` block rather than overwriting it. Read the file first.
+
+**CI gate** — `.github/workflows/firebreak.yml`:
+
+```yaml
+name: firebreak
+on: pull_request
+
+jobs:
+  cost-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # REQUIRED — scope.sh needs the merge base
+      - name: Firebreak cost review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Invoke Claude Code non-interactively against the PR branch.
+          # Check the current claude-code CI action or CLI flags before relying on this.
+          claude -p "Run the firebreak skill in review mode on this PR, with --ci" \
+            --allowed-tools "Read,Grep,Glob,Bash"
+```
+
+`fetch-depth: 0` is not optional and is the single most common way this breaks — a shallow
+clone has no merge base, `scope.sh` exits 2, and the job passes green having reviewed nothing.
+
+Confirm the exact invocation against current Claude Code CI documentation rather than trusting
+this template verbatim; the surrounding structure is the durable part.
+
+Then set the gate to advisory. In `.firebreak.yml`:
+
+```yaml
+block_at: none
+baseline: .firebreak-baseline.json
+```
+
+**Run advisory for at least one sprint before moving `block_at` off `none`.** Precision is
+unmeasured on this repository, and a gate that blocks a release on a finding the team disagrees
+with is a gate that gets deleted.
+
+## 5. Hand it back
+
+Do not stop at writing files. Tell the user, plainly:
+
+1. **Which catalog entries need a number**, and roughly who would know — contract owner,
+   finance, whoever signed the vendor.
 2. **Which unit questions need answering** — per call or per result, do retries bill, do
    failures bill. This is where the surprises live: Twilio bills failed messages, and S3 bills
    `LIST` at the PUT rate rather than the GET rate.
-3. **That Firebreak works now regardless.** An unpriced vendor is still reported; it carries no
+3. **What you wired up**, and how to undo it. A trigger someone cannot find to remove is a
+   trigger they will work around instead.
+4. **That Firebreak works now regardless.** An unpriced vendor is still reported; it carries no
    dollar figure rather than a guessed one. Filling in rates upgrades findings from a mechanism
    to a number — it does not unblock anything.
 

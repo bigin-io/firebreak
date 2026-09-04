@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-09-04
+
+### Added
+
+- **`firebreak-setup` now configures how Firebreak is triggered**, and asks rather than
+  choosing: on demand, a commit-time reminder via a `PreToolUse` hook, a blocking pre-commit
+  hook, or a CI gate. It writes the config for whichever is picked — merging into an existing
+  `.claude/settings.json` hooks block rather than overwriting it — and ships a
+  `.github/workflows/firebreak.yml` template.
+
+  The CI template sets `fetch-depth: 0`, which is not optional and is the single most common
+  way this breaks: a shallow clone has no merge base, `scope.sh` exits 2, and the job passes
+  green having reviewed nothing.
+
+- **An honest warning against the most obvious choice.** A review takes minutes, because
+  reading surrounding code and tracing writers is the work. A hook that blocks every commit for
+  several minutes gets bypassed within a day and removed within a week, leaving the repository
+  with no coverage while everyone believes it has some. Setup states this before wiring one up,
+  and wires it up anyway if the user still wants it — defaulting to advisory and non-blocking.
+
+### Changed
+
+- Setup's "writes exactly one file" promise corrected to name the full set it may write —
+  `.firebreak/catalog.md` plus the chosen trigger config. It still never touches source.
+
 ## [1.2.0] - 2026-09-04
 
 ### Added

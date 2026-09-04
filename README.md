@@ -25,13 +25,26 @@ cp -r firebreak/skills/firebreak ~/.claude/skills/firebreak
 firebreak-setup
 ```
 
-Inventories which metered vendors this repository actually bills against, separates the ones
-already priced from the ones needing a negotiated contract rate, and writes a pre-filled
-`.firebreak/catalog.md` with the rates left blank for a human. It writes that one file and
-never touches source.
+Two things. It inventories which metered vendors this repository actually bills against and
+writes a pre-filled `.firebreak/catalog.md` with rates left blank for a human. Then it asks how
+Firebreak should be triggered and wires up the choice:
 
-Skip it if you like — Firebreak works without it. Unpriced vendors are still reported, just
-without a dollar figure.
+| Option | Cost |
+|---|---|
+| **On demand** | Nothing — runs when someone types `firebreak` |
+| **Commit-time reminder** | Nothing at commit time; it prompts, it does not review |
+| **Blocking pre-commit hook** | **Minutes per commit** — see below |
+| **CI gate** | A job per PR |
+
+**On demand plus CI is the right default for most teams.** A review takes minutes, because
+reading surrounding code and tracing writers is the work that makes it any good. A hook that
+blocks every commit for several minutes gets `--no-verify`'d within a day and uninstalled
+within a week — and then the repository has no coverage while everyone believes it has some.
+Setup will say so before wiring one up, and will still wire it up if you want it.
+
+It writes only configuration — the catalog and whichever trigger you choose — and never touches
+source. Skip the whole thing if you like; Firebreak works without it, and unpriced vendors are
+still reported, just without a dollar figure.
 
 ## Use
 

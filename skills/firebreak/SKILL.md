@@ -115,6 +115,23 @@ is available on request anyway.
 Paths are **repo-relative from the repository root**, not from a module root, anchored to a
 **changed** line. A path the reader cannot paste into an editor is a path they will not check.
 
+**Quote the line you cite.** Every `file:line` reference carries the actual source text beside
+it — inline in the prose, or as a short block:
+
+```
+`stores/messaging.ts:474` — `const needsPreview = convs.filter((c) => !c.last_message_body?.trim())`
+```
+
+Two reasons, and the second is why it is not optional:
+
+1. **Line numbers drift.** Measured on real repositories: citations ran 8–23 lines off while the
+   claims themselves were correct. A reader who jumps to the number, sees unrelated code, and
+   concludes the report is hallucinating will stop reading — and they will be wrong, which is
+   worse than if they were right. A quoted line is self-locating: they can search for it.
+2. **You cannot quote a line that does not exist.** Quoting is the cheapest available check
+   against citing something you inferred rather than read. If you cannot produce the text, you
+   have not confirmed the claim — go and read it before writing the finding.
+
 ### Exposure: always a worst case, never "not derivable"
 
 **A finding must show the largest defensible dollar figure.** "Not derivable from static

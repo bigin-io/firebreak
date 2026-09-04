@@ -26,6 +26,20 @@ concatenated**. Characters `[ ] { } \ ~ ^ | €` count as **two**. Any non-GSM c
 UCS-2: 70 chars, 67 concatenated. A 300-character reminder with a link and a `[STOP]`
 instruction is 2–3 segments — so the real rate is **$0.025–$0.0375 per message**, not $0.0125.
 
+**Twilio Conversations bills on a different axis to SMS, and the difference inverts severity.**
+Conversations is priced **per monthly active user (~$0.05/MAU)**, not per API call. A loop that
+hammers the Conversations REST API — listing, fetching, joining — costs **nothing extra**;
+what it exhausts is the rate limit and the SDK's subscribed-object cap. The failure mode is a
+broken inbox, not an invoice.
+
+> So an unbounded fan-out over Conversations is a correctness and availability finding, not a
+> cost one. Do not price it per call, and do not escalate it on volume. Check which Twilio
+> product a path actually uses before reaching for the per-segment rate above — same vendor,
+> opposite verdict.
+
+Note the outbound SMS a Conversation sends **is** billed per segment at the rate above. The
+per-MAU pricing covers the conversation, not the messages leaving it.
+
 **Email — the overage rate is what matters in a runaway, not the bundle price.**
 
 | Provider | Per 1,000 |

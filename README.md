@@ -1,3 +1,5 @@
+![Firebreak — change-set risk review for Claude Code. Reports; never edits.](assets/cover.jpg)
+
 # Firebreak
 
 A Claude Code skill that reads a **change set** and answers one question: could this change

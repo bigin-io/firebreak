@@ -42,9 +42,16 @@ correct, tested, and unreachable.
 - A spend bound whose state is advanced only by a call that can fail independently
 
 It prices findings from a catalog of observed provider rates — Twilio, Stripe, Anthropic,
-OpenAI, SES/SendGrid, S3, Google Maps, Algolia, Cloudflare Workers, Mixpanel — and refuses to
-invent a multiplier. If executions aren't derivable from the code, it says so and prices one
-call.
+OpenAI, SES/SendGrid, S3, Google Maps, Algolia, Cloudflare Workers, Mixpanel, BigQuery — and
+refuses to invent a multiplier. If executions aren't derivable from the code, it says so and
+prices one call.
+
+**The vendor that dominates your bill is probably not in that list.** Industry-specific APIs —
+record retrieval, KYC, credit pulls, market data — are billed per call under a negotiated
+contract, often orders of magnitude above any public SaaS rate. Put those in
+`.firebreak/catalog.md` at your repository root and Firebreak reads them too. A vendor missing
+from both catalogs is still reported; it just carries no dollar figure rather than a guessed
+one.
 
 ## The two rules
 

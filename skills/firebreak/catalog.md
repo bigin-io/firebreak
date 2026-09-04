@@ -128,6 +128,51 @@ $0.05 above. **1 TB of accidental egress ≈ $83.**
 
 ---
 
+## House vendors — `.firebreak/catalog.md`
+
+**Everything above is table stakes. The vendor that dominates your bill is probably not in
+it.**
+
+The rates here are public SaaS list prices. Industry-specific vendors — clinical record
+retrieval, KYC and identity verification, credit bureau pulls, carrier and logistics rate
+APIs, background checks, court and title search, market data feeds — are usually billed per
+call under a negotiated contract, at unit costs one to three orders of magnitude above
+anything on this page. A single call can be dollars, not fractions of a cent.
+
+In one measured audit, the priciest unit cost in the service was a per-search medical-record
+retrieval API. It is not in this catalog and could not be: the rate is contractual.
+
+**So Firebreak reads a second catalog if the repository under review provides one.** Create
+`.firebreak/catalog.md` at the repository root, in the same shape as this file. Entries there
+take precedence over anything here.
+
+```markdown
+## House vendors
+
+**AcmeRecords `POST /v2/search`** — $3.50 per search (contract rate, 2026-Q3, renegotiated
+annually — confirm before quoting). Billed per *search*, not per result, so a retry after a
+timeout bills twice. Expected guardrails: a per-patient dedup key, a daily cap per customer,
+and a circuit breaker on the completion webhook.
+
+**FooBureau `/credit/pull`** — $0.85 per pull. Hard-fails at the contract ceiling rather than
+billing overage, so the runaway shape is an availability outage, not an invoice.
+```
+
+Two rules for house entries, both learned the expensive way:
+
+1. **Record the date and the source.** A contract rate quoted from memory a year later is a
+   fabricated number wearing a suit.
+2. **Write down what the unit actually is.** Per call or per result, per search or per record,
+   per event or per tracked user, whether retries bill, and whether failures bill. That
+   distinction is usually where the surprise lives — it is why Twilio's failed-message fee and
+   S3's `LIST`-at-PUT-rate are called out above.
+
+**An unpriced vendor is still a finding.** If a metered operation has no entry in either
+catalog, report the mechanism and state that the figure is not derivable. Never guess a
+contract rate.
+
+---
+
 ## Platform guardrails that already exist
 
 Flagging something the platform already stops is a false positive in practice. Check before

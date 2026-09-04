@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-09-04
+
+### Added
+
+- **Project-local catalog: `.firebreak/catalog.md`.** A repository can now carry its own vendor
+  rates, and Firebreak reads them alongside the shipped catalog. House entries take precedence.
+  The shipped catalog is public SaaS list pricing; the vendor that dominates a real bill is
+  usually an industry-specific API billed per call under a negotiated contract, at a unit cost
+  one to three orders of magnitude higher. Those rates belong with the code they describe, not
+  in a public file.
+
+### Fixed
+
+- **A vendor missing from the catalog no longer reads as permission to skip the finding.** Step
+  4 said "look the operation up in `catalog.md`" and did not say what to do when it was not
+  there. The catalogs price findings; they do not define what counts as one. An operation that
+  bills per call, per unit, per event or per byte scanned is in scope whether or not anyone has
+  written its rate down — report the mechanism and state that the money is not derivable. This
+  inverted the tool's behaviour on precisely the vendors that matter most, since those are the
+  ones most likely to be missing.
+
 ## [1.0.0] - 2026-09-04
 
 First release. Packaged as a Claude Code plugin.

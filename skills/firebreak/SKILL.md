@@ -72,8 +72,16 @@ CI has its own contract — exit codes, baselines, and how to avoid a flaky gate
      an answer; `send_count < 3`, checked in the eligibility query, is.
    - **Can that bound fail independently of the spend?** This is the question that catches
      the expensive bugs. Trace *what writes the bound's state*.
-4. **Price it.** Look the operation up in `catalog.md`. Give a range with the arithmetic
-   shown, or say the figure is not derivable — never invent one.
+4. **Price it.** Look the operation up in `catalog.md`, and in `.firebreak/catalog.md` in the
+   repository under review if that file exists — house vendors live there. Give a range with
+   the arithmetic shown, or say the figure is not derivable — never invent one.
+
+   **A vendor missing from both catalogs is not a reason to drop the finding.** The catalogs
+   price findings; they do not define what counts as one. An operation you can see is metered
+   — it bills per call, per unit, per event, or per byte scanned — is in scope whether or not
+   anyone has written its rate down. Report the mechanism and say the money is not derivable.
+   Silently skipping an unpriced vendor is the failure mode that matters here, because the
+   vendors most likely to be missing are the industry-specific ones that dominate a real bill.
 5. **Report.** Format below.
 
 **Read `method.md` before step 3 on any change that survives triage.** It carries the

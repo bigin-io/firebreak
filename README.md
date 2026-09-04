@@ -19,6 +19,20 @@ git clone https://github.com/bigin-io/firebreak
 cp -r firebreak/skills/firebreak ~/.claude/skills/firebreak
 ```
 
+## Set up a repository (optional, one-off)
+
+```
+firebreak-setup
+```
+
+Inventories which metered vendors this repository actually bills against, separates the ones
+already priced from the ones needing a negotiated contract rate, and writes a pre-filled
+`.firebreak/catalog.md` with the rates left blank for a human. It writes that one file and
+never touches source.
+
+Skip it if you like — Firebreak works without it. Unpriced vendors are still reported, just
+without a dollar figure.
+
 ## Use
 
 In a Claude Code session in the repository you want reviewed:

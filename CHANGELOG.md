@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-09-04
+
+### Added
+
+- **`firebreak-setup` skill.** One-off per repository. Inventories which metered vendors the
+  codebase actually bills against — reading `.env.example` and config templates first, since
+  they are the densest signal — classifies them into already-priced, needs-a-contract-rate, and
+  not-metered, and writes a pre-filled `.firebreak/catalog.md` with rates left blank and call
+  sites recorded. It writes that one file and never touches source.
+
+  It also flags spend *initiated outside the codebase*: if a repository sets eligibility or
+  hands out a work list that another system sends from, it drives that spend without ever
+  making the call.
+
+  This sweeps the repository, which the review skill is forbidden from doing. The rule does not
+  transfer: review looks for defects, where breadth produces confident false all-clears; setup
+  builds an inventory, where breadth is the point and a missed vendor self-corrects the first
+  time Firebreak reports a finding it cannot price.
+
 ## [1.1.0] - 2026-09-04
 
 ### Added

@@ -119,13 +119,37 @@ trivial.
 
 Build it in this order:
 
-1. **A prior incident of this shape**, if `.firebreak/catalog.md` records one. *"This shape cost
-   $1,600 and ran 36 hours"* beats anything you can derive — it already happened here and nobody
-   can argue the multiplier.
+1. **A prior incident whose recorded shape matches this mechanism**, if `.firebreak/catalog.md`
+   records one. *"This shape cost $1,600 and ran 36 hours"* beats anything you can derive —
+   nobody can argue a bill already paid. **Only when the shape genuinely matches** — see below.
 2. **Scale facts**, if recorded (`## Scale` in `.firebreak/catalog.md`) — population sizes,
    scheduler intervals, batch sizes. Then the worst case is **computed**, and say so.
 3. **A named assumption**, when neither exists. Pick a plausible figure, state it in the same
    sentence, and point at where to make it exact.
+
+#### A recorded fact applies only to the path or shape it names
+
+Recorded facts are the strongest evidence in the report, which is exactly why misapplying one
+is worse than having none. Two rules, and they are not stylistic:
+
+**A prior incident has two separate uses with different match requirements.**
+
+| Use | Requires | Phrase it as |
+|---|---|---|
+| **Exposure figure** | The recorded **shape** string matches this finding's mechanism | *"This shape — a bound advanced by an independently-failing caller — cost $1,600 over 36 hours here."* Quote the recorded shape so the reader can check |
+| **Detection-time precedent** | Only the same **sink** (SMS, Stripe, S3 …) | *"The last SMS runaway here took 36 hours to notice."* Detection history, never shape identity |
+
+If the shape does not match, **you may not cite the amount as exposure.** Compute it instead,
+and use the incident only for how long this organisation takes to notice.
+
+**"The same shape" is a claim, not a flourish.** Write it only next to the recorded shape
+string. A reader who cannot check the claim will either over-trust it or stop trusting the
+report.
+
+**Scale facts belong to the path they name.** A scheduler interval recorded for one job is not
+the interval of a different job; a cohort size for onboarding is not a campaign segment. If the
+figure you need is not recorded for *this* path, that is a named assumption (item 3), not a
+borrowed fact — and say which job's number you borrowed if you borrow one anyway.
 
 Say **unbounded** whenever nothing in code stops it — that word is the single most important
 fact in the finding — and then still give the number.

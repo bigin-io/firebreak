@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-09-04
+
+### Fixed
+
+- **A recorded incident could be cited as exposure for a finding it does not match.** 1.5.0 made
+  a prior incident the preferred exposure source without gating it on the shape actually
+  matching, and a review consequently priced a *deleted guardrail* finding by asserting "the
+  same observable shape cost this repo $1,600" — a different mechanism entirely from the
+  recorded "bound advanced by an independently-failing caller."
+
+  A prior incident now has two uses with different requirements: as an **exposure figure** only
+  when the recorded shape string matches the mechanism, quoting that string so the reader can
+  check; as a **detection-time precedent** for any incident on the same sink, phrased as
+  detection history and never as shape identity. "The same shape" is a claim, not a flourish.
+
+- **Scale facts could be borrowed across subsystems.** A review priced a campaign path using the
+  *drip* scheduler's interval. A recorded fact now applies only to the path it names; if the
+  figure is not recorded for this path it is a named assumption, not a borrowed fact.
+
+  Same root cause as the above: recorded facts are the strongest evidence in a report, which is
+  why misapplying one is worse than having none.
+
 ## [1.5.0] - 2026-09-04
 
 ### Changed

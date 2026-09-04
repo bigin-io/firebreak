@@ -5,6 +5,157 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-09-04
+
+### Removed
+
+- **`bulkhead-audit`, one release after adding it — `bigin-appsec` already did repository-wide
+  audit, and did it better:** seven language gate banks, an eval corpus with labelled twins and
+  thresholds, a deterministic tier, fingerprinting, SARIF/HTML/exec-brief renderers, an
+  authorization gate. `bulkhead-audit` had prose.
+
+  Its one real advantage was finding shapes appsec's rules did not cover — which is rule
+  coverage, not architecture. Those rules were added instead: `gate-php-unreachable-guard` and
+  `gate-php-route-group-no-auth`, with corpus twins, seeded by the run that had justified the
+  skill. Deterministic on every PHP repository, instead of nine agents and forty minutes.
+
+  Both bulkhead skills were built without first checking what already existed. The habit that
+  prevents that is asking before building, not after the second release.
+
+### Changed
+
+- **`bulkhead` is now scoped explicitly to pre-merge review**, with an instruction in the skill:
+  if it is ever extended to sweep a repository, delete it instead. Its niche is change-set
+  review, which appsec does not currently do.
+
+## [1.10.0] - 2026-09-04
+
+### Added
+
+- **`bulkhead-audit` — repository-wide security audit as fan-out, not a bigger prompt.** A
+  separate skill rather than a mode flag on `bulkhead`, because a shared entry point would turn
+  the gate into a sweep the first time someone ran it without a ref, which is the measured
+  failure.
+
+  A single broad sweep produces shallow reads everywhere — a reader cleared a live bug it had
+  correctly observed. So the audit decomposes into narrow questions, since narrow is what the
+  measurement rewarded: a mechanical inventory first, where breadth is correct and a miss
+  self-corrects, then one investigation per entry point, never more than one at a time. Shape
+  hunts grep for candidates only; a grep hit is never a finding. Existing SARIF is read as prior
+  context, with instructions to go past it rather than duplicate it. Coverage and what limits
+  confidence are both reported, because somebody will act on an audit's silence as much as on
+  its findings.
+
+  Withdrawn in 1.11.0.
+
+## [1.9.0] - 2026-09-04
+
+### Added
+
+- **Read-only reviewer agents, `firebreak-reviewer` and `bulkhead-reviewer`.** Both declare
+  `tools: Read, Grep, Glob, Bash` — no Edit, no Write — so "reports, never edits" becomes
+  harness-enforced rather than an instruction the reviewer could talk itself out of. A confident
+  wrong patch built on a misread mechanism is worse than the bug, because it looks resolved.
+
+  Each agent names the two things its handoff must carry, a repository path and a change set,
+  and is told to ask rather than default to reviewing the whole repository — the one measured
+  failure the skills exist to avoid. Bash is for git, grep and reading, explicitly not for
+  mutating the repository under review; running the project's tests to confirm a claim is
+  allowed and often worth doing. `bulkhead-reviewer` additionally may not exercise a suspected
+  vulnerability against anything running: reason about the exploit, do not perform it.
+
+## [1.8.0] - 2026-09-04
+
+### Added
+
+- **`bulkhead` — the same change-set method, pointed at security.** Asks what a change exposes,
+  to whom, and whether the control between them holds. Inherits the rules measured for
+  firebreak: change set not repository, reports never edits, quote every cited line, budget the
+  report.
+
+  **The money is the one thing that does not transfer.** Firebreak's severity falls out of a
+  computed figure; security has no such scalar, and the usual substitute is CVSS — a rating
+  assigned from a matrix that inflates on analyser uncertainty, precisely the failure that got a
+  severity model withdrawn twice here. So bulkhead reports reachability instead: who triggers
+  it, from where, doing what, getting what, under which pre-conditions. Every line of that is
+  checkable, and a reader can disagree with a specific claim.
+
+  That yields the gate this most needs: if you cannot say who triggers it and from where, you do
+  not have a finding yet. Unreachable-in-practice findings are what made security tooling
+  ignorable.
+
+  `skills/bulkhead/catalog.md` carries required controls rather than prices, plus the checks
+  that impersonate controls — hostname string tests against SSRF, authentication mistaken for
+  authorisation, vendor scrubbing that never touches image attachments. Both real findings from
+  that week's runs are recorded as the shapes they are.
+
+  Stated in the skill itself: these rules are inherited and reasoned about, not earned the way
+  firebreak's were. Run it against known-vulnerable diffs and record where it fails before
+  gating anything on it.
+
+## [1.7.0] - 2026-09-04
+
+### Changed
+
+- **Every cited line must now be quoted.** Citations ran 8–23 lines off on real repositories
+  while the claims themselves were correct. On the synthetic testbed, where files were 30–80
+  lines, drift was zero — so this was structurally invisible until the first use outside it:
+  five real Bigin repositories, four languages.
+
+  A reader who jumps to the number, sees unrelated code and concludes the report is
+  hallucinating will stop reading, and they will be wrong — which is worse than if they were
+  right. Quoting makes the citation self-locating, and you cannot quote a line that does not
+  exist, so it doubles as the cheapest check against citing something inferred rather than read.
+
+### Added
+
+- **Twilio Conversations in the catalog, billed per monthly active user rather than per API
+  call.** A review found an unbounded Conversations fan-out and correctly scored it LOW because
+  the dollar ceiling is about zero: it exhausts the rate limit, so the inbox breaks rather than
+  bills. The catalog carried only SMS at $0.0125/segment, so that reasoning had to come from
+  outside it. Same vendor, different billing axis, opposite verdict.
+
+## [1.6.1] - 2026-09-04
+
+### Fixed
+
+- **Severity keyed on "no cap in code" collapsed the middle band.** 1.6.0 keyed severity on
+  boundedness and reversibility, and defined irreversible as "money leaves an account" — true of
+  every metered call. Two of three purpose-built middle-band cases came out CRITICAL: an LLM
+  re-summarisation loop with no external effect, and a $5-per-1,000 geocode on profile saves
+  priced at about $150/month, landing in the same band as unbounded charges against real
+  customers' cards.
+
+  That is verbatim the defect that killed the predecessor severity model — the matrix routes
+  ignorance to CRITICAL and the money drops out of the verdict — which this project records
+  under defects not to reintroduce. Reproduced within one release of adding severity at all.
+
+  Severity is now the exposure figure crossed with whether the spend has an irreversible
+  real-world effect. The spend itself is always irreversible and is not what that axis measures:
+  deleting bad summaries undoes the harm, un-sending a text does not. And "no cap in code" is
+  not "unbounded exposure" — a per-save geocode has a ceiling set by how often humans edit
+  profiles, and calling that unbounded is what flattened the scale.
+
+- **A fourth guard rule: the money must move the verdict.** If a trivial spend and an unbounded
+  one land in the same band, the scale is broken and the review says so rather than emitting it.
+
+## [1.6.0] - 2026-09-04
+
+### Added
+
+- **Computed severity — CRITICAL / HIGH / MEDIUM / LOW / CLEAN — derived, never
+  author-assigned.** It falls out of the two judgements the Exposure line already makes, bounded
+  and reversible, crossed with a `material_threshold` the repository sets (default $1,000).
+
+  The predecessor severity model was formally withdrawn for routing analyser ignorance straight
+  to CRITICAL while the money dropped out of the verdict entirely, and the brief's whole
+  positioning is reporting in money rather than in severity words. So three rules are stated
+  with the rubric: ignorance never escalates and caps at MEDIUM; an unknown multiplier is not
+  unboundedness; and severity never replaces the money — both appear, always. The severity emoji
+  is a scannable index into the exposure figure, not a substitute for it.
+
+  Superseded in part by 1.6.1.
+
 ## [1.5.1] - 2026-09-04
 
 ### Fixed

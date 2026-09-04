@@ -109,21 +109,42 @@ is available on request anyway.
 Paths are **repo-relative from the repository root**, not from a module root, anchored to a
 **changed** line. A path the reader cannot paste into an editor is a path they will not check.
 
-### Exposure is a ceiling, not a rate
+### Exposure: always a worst case, never "not derivable"
 
-A unit rate reads as trivial and buries the risk. *"$4.45 per client per year"* is accurate and
-tells the reader nothing about whether to panic.
+**A finding must show the largest defensible dollar figure.** "Not derivable from static
+analysis" is a precision note, not an answer — it can appear in a parenthetical, never as the
+exposure line. A reader who gets a disclaimer instead of a number learns nothing about whether
+to panic, and a unit rate does the same: *"$4.45 per client per year"* is accurate and reads as
+trivial.
 
-Lead with the worst case, and name what bounds it:
+Build it in this order:
 
-- **Unbounded** when nothing in code stops it. Say the word — it is the single most important
-  fact in the finding.
-- **Bounded at $X** when something does — and name the bound.
-- The unit rate is supporting detail. Give it once.
+1. **A prior incident of this shape**, if `.firebreak/catalog.md` records one. *"This shape cost
+   $1,600 and ran 36 hours"* beats anything you can derive — it already happened here and nobody
+   can argue the multiplier.
+2. **Scale facts**, if recorded (`## Scale` in `.firebreak/catalog.md`) — population sizes,
+   scheduler intervals, batch sizes. Then the worst case is **computed**, and say so.
+3. **A named assumption**, when neither exists. Pick a plausible figure, state it in the same
+   sentence, and point at where to make it exact.
 
-**If the repository records a prior incident of this shape** (`.firebreak/catalog.md`), lead
-with that instead: *"this shape cost $1,600 and ran 36 hours"* beats any figure you can derive,
-because it already happened here.
+Say **unbounded** whenever nothing in code stops it — that word is the single most important
+fact in the finding — and then still give the number.
+
+**A stated assumption is not an invented multiplier.** The rule against inventing one means:
+never present an assumed figure *as measured*. Naming it is what makes it honest and lets the
+reader correct it at a glance. Dodging the number entirely is the worse failure.
+
+```
+✅ Worst case: ~$250 every time it runs at 10,000 active users — $2,500 at 100,000 —
+   and nothing stops it running twice. (Population assumed; record your real count in
+   .firebreak/catalog.md and this becomes exact.)
+
+❌ Unbounded. Active-user count is not derivable from static analysis.
+❌ $4.45 per client per year.
+```
+
+Give the unit rate once, as supporting detail. When a bound does hold, say **bounded at $X**
+and name the bound.
 
 ### Time to notice decides severity
 
@@ -140,10 +161,24 @@ shape"* — that belongs in the first three lines of the finding, not in a closi
 - **One scenario, not three.**
 - **Say it once.** Confidence caveats live in **Unknown**. There is no closing confidence
   section.
-- **Nothing outside the change set** — not even to say it was checked and is fine.
+- **Nothing about files outside the change set** — not even to say they were checked and are
+  fine. But a real defect *inside* the diff that is not a cost risk still earns one line under
+  **Noticed, out of scope** — a branch that does not compile is worth saying even at the cost of
+  a few words.
 - **Cut any sentence that would not change what the reader does next.**
 
 Close with: *Ask for the full trace, the arithmetic, or the alternatives considered.*
+
+### Before you write a finding heading
+
+The template above has slots, and a form with blanks invites filling them. Two gates, both of
+which mean **say clean and stop**:
+
+- **Exposure is bounded and the bound is deliberate.** A design you would not change is not a
+  finding. Mention it in the clean verdict if it is genuinely interesting; do not give it a
+  heading and a Fix.
+- **You are about to write "this may not be a finding at all."** If that sentence is true, it
+  isn't one. Ask the question in the verdict line, or say nothing.
 
 **Reporting nothing is a valid, useful result.** Most changes carry no cost risk. A review that
 manufactures a concern to look thorough is worse than useless: it trains people to skip the next

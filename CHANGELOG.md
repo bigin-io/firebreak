@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-09-04
+
+### Changed
+
+- **Exposure must always carry a worst case. "Not derivable from static analysis" can no longer
+  be the exposure line** — it is a precision note and belongs in a parenthetical. A reader given
+  a disclaimer instead of a number learns nothing about whether to panic, which was the actual
+  complaint behind "the report doesn't make the risk clear."
+
+  Build order is now: a recorded prior incident of the shape, else recorded scale facts (worst
+  case computed), else a **named assumption** stated in the same sentence as the figure.
+
+- **A stated assumption is not an invented multiplier.** The prior rule against inventing one
+  was making reviews dodge the number entirely. The real line: never present an assumed figure
+  *as measured*. Naming it is what makes it honest and lets the reader correct it at a glance.
+
+- **The out-of-scope rule is scoped to files, not defects.** v1.4.0 said "nothing outside the
+  change set," and a review consequently dropped an unused-import build break that was *inside*
+  the diff. Files outside the diff stay out; a real defect inside it earns one line even at the
+  cost of a few words.
+
+### Added
+
+- **`## Scale` in `.firebreak/catalog.md`** — population sizes, scheduler intervals, batch
+  sizes. The multiplier is almost never in the code: it lives in the database and in
+  infrastructure config. Recording it once turns every worst case from assumed into computed.
+  `firebreak-setup` now asks for these, and for any prior incident, while it is already asking
+  about vendors and triggers.
+
+- **A gate before writing a finding heading.** v1.4.0's template has labelled slots, and a form
+  with blanks invites filling them — a review promoted a deliberate, bounded design decision to
+  a finding with a Fix. Two gates now mean say clean and stop: exposure is bounded and the bound
+  is deliberate; or you are about to write "this may not be a finding at all," which means it
+  isn't one.
+
 ## [1.4.0] - 2026-09-04
 
 ### Changed

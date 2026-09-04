@@ -90,6 +90,27 @@ Source: _(who confirmed, and when)_
 For each entry that needs a rate, record **where it is called from**, so whoever fills in the
 number can see what it costs per call site.
 
+## 3b. Ask for scale facts
+
+While you have their attention. **This is the difference between a finding that says "unbounded,
+population unknown" and one that says "$2,500 per accidental run."**
+
+Ask for whatever they know, and write it under `## Scale` in `.firebreak/catalog.md`:
+
+- Roughly how many active users / customers / patients?
+- Largest batch or segment a job processes in one run?
+- How often does each scheduled job fire?
+- Any population that grows unboundedly — a queue, a backlog, a retry table?
+
+**Coarse and dated beats precise and stale.** An order of magnitude is enough; nobody maintains
+a number they have to update weekly. If they do not know, write the question down as an open
+item rather than guessing — a recorded unknown is useful, an invented figure is not.
+
+Also ask whether the codebase has **already had a cost incident**. If so, record it under
+`## Known incidents` with the amount, how long it ran before anyone noticed, and the mechanism
+in one sentence. A bill already paid is the most credible number a review can cite, and
+time-to-detection is the field people forget.
+
 ## 4. Ask how it should be triggered
 
 **Ask. Do not pick for them.** The right answer depends on team size, review culture, and how

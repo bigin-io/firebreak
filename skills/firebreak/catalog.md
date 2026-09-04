@@ -158,6 +158,30 @@ and a circuit breaker on the completion webhook.
 billing overage, so the runaway shape is an availability outage, not an invoice.
 ```
 
+## Scale facts — what makes a worst case exact
+
+**The multiplier is almost never in the code.** Population sizes live in the database;
+scheduler intervals live in infrastructure config; batch sizes live in whoever configured the
+job. That is why a reviewer has to assume them — and why the assumption is worth eliminating
+once, in `.firebreak/catalog.md`:
+
+```markdown
+## Scale
+- Active users: 40,000
+- Typical onboarding cohort: ~5,000
+- Reminder scheduler: every 15 minutes
+- Largest campaign segment: 12,000
+- Dunning population, monthly: ~800 invoices
+```
+
+With these recorded, a worst case is **computed** rather than assumed, and the finding says so.
+Without them, the reviewer names an assumption in the same sentence as the figure and points
+here — which is honest, but it means every reader re-does the same arithmetic in their head
+with different numbers.
+
+Keep them coarse and dated. An order of magnitude that is roughly right beats a precise figure
+that is a year stale, and nobody will maintain a number they have to update weekly.
+
 ## Known incidents — the most credible number you have
 
 Rates are estimates. **A prior incident in this repository is a measurement.**

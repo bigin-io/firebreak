@@ -1,0 +1,141 @@
+# Money-sink catalog
+
+Unit costs for pricing a finding. **Observed 2026-08-21, USD.** Every source page is
+JS-rendered and at least one summarising fetch hallucinated a rate table on first attempt —
+so treat these as needing a scheduled refresh, and **never quote a figure with more precision
+than the range below supports.**
+
+Give a range with the arithmetic shown. If executions are not derivable from the code, say
+**"not derivable from static analysis"** and price one call instead. Do not invent a
+multiplier.
+
+---
+
+## Comms
+
+**Twilio SMS (US long code).** Base $0.0083/segment outbound, **plus A2P 10DLC carrier fees
+per segment** — AT&T $0.0035, T-Mobile/Verizon $0.0045, US Cellular $0.0050, other $0.0040.
+
+> **All-in: $0.0118–$0.0133/segment. Use ~$0.0125 blended.** 50,000 segments ≈ **$625**.
+
+MMS out $0.022. **Failed messages are billed** at $0.001 (since 30 Sep 2024) — a loop sending
+to a dead number still costs money.
+
+**Segments matter and are routinely undercounted.** GSM-7 is 160 characters alone, **153 when
+concatenated**. Characters `[ ] { } \ ~ ^ | €` count as **two**. Any non-GSM character forces
+UCS-2: 70 chars, 67 concatenated. A 300-character reminder with a link and a `[STOP]`
+instruction is 2–3 segments — so the real rate is **$0.025–$0.0375 per message**, not $0.0125.
+
+**Email — the overage rate is what matters in a runaway, not the bundle price.**
+
+| Provider | Per 1,000 |
+|---|---|
+| Amazon SES | $0.10–0.16 |
+| SendGrid (mid-tier overage) | $0.90 |
+| Resend | ~$0.90 |
+| Postmark | $1.20–1.80 |
+
+Email is cheap per unit. **Availability and reputation fail before the bill does** — an
+unthrottled send loop exhausts connections and gets the sending domain blocked. Price it, but
+say that.
+
+## Payments — Stripe
+
+| Item | Fee |
+|---|---|
+| US domestic online card | 2.9% + $0.30 |
+| Manually entered / international / FX | +0.5% / +1.5% / +1% |
+| **Dispute or chargeback received** | **$15.00** |
+| ACH Direct Debit | 0.8%, $5.00 cap |
+
+> **For idempotency and double-charge findings the blast-radius number is the $15 chargeback
+> fee, not the 2.9%.** At low ticket sizes chargebacks dominate the loss.
+
+Also price the **irreversibility**: a duplicate charge on a real customer is a refund, a
+support cost, and a trust cost that no fee table captures. Say so.
+
+## AI tokens — per 1M tokens, standard tier
+
+**Anthropic**
+
+| Model | Input | Cache read | Output |
+|---|---|---|---|
+| Claude Fable 5 | $10 | $1 | $50 |
+| Claude Opus 5 | $5 | $0.50 | $25 |
+| Claude Sonnet 5 | $2 | $0.20 | $10 |
+| Claude Haiku 4.5 | $1 | $0.10 | $5 |
+
+Batch API is a flat 50% off. Cache write multipliers: 5m 1.25×, 1h 2×; read 0.1×.
+
+Three things the per-MTok table hides:
+
+- **Claude 4.7 and later use a tokenizer producing ~30% more tokens for identical text.**
+  Affects Fable 5, Opus 5, Sonnet 5. **Not** Haiku 4.5. Apply this **before** the rate, not
+  after, or the estimate understates by roughly 30%.
+- `inference_geo: "us"` adds **1.1×** on every token category (4.6 and later).
+- Sonnet 5 carries **no long-context surcharge** at 1M context, unlike OpenAI.
+
+**OpenAI** — the flagship family is **gpt-5.6**, not gpt-4o.
+
+| Model | Input | Cached in | Output |
+|---|---|---|---|
+| gpt-5.6-sol | $5.00 | $0.50 | $30.00 |
+| gpt-5.6-sol long-context | $10.00 | $1.00 | $45.00 |
+| gpt-5.6-terra | $2.00 | $0.20 | $12.00 |
+| gpt-5.6-luna | $0.20 | $0.02 | $1.20 |
+
+Batch and Flex exactly 50% off; Fast mode exactly 2×. Regional endpoints +10% for models
+released on or after 2026-03-05. Web search **$10.00 per 1,000 calls**.
+
+**Expected guardrails:** `max_tokens`, a turn or iteration cap on any agent loop, prompt
+caching actually taking effect, and a total-spend ceiling. **Caching that is configured but
+silently inactive is a documented six-figure failure** — if a diff touches caching, check the
+cache-read tokens are actually being reported, not just that the parameter is set.
+
+## Cloud — AWS
+
+| Item | Price |
+|---|---|
+| **S3 PUT / COPY / POST / LIST** | **$0.005 per 1,000** |
+| S3 GET / SELECT / other | $0.0004 per 1,000 |
+| S3 storage, first 50 TB | $0.023/GB-mo |
+| Lambda requests | $0.20 per 1M |
+| Lambda duration (x86) | $0.0000166667 per GB-s |
+
+1M PUTs = **$5.00**; 1M GETs = $0.40.
+
+> **A runaway `LIST` loop bills at the PUT rate, not the GET rate.** 10M LISTs = **$50**, not
+> $4. Paginators that never terminate are the classic form.
+
+**Egress:** first 100 GB/mo free, then $0.09/GB to 10 TB, $0.085 to 50 TB, $0.07 to 150 TB,
+$0.05 above. **1 TB of accidental egress ≈ $83.**
+
+## Classic bill-shock SKUs
+
+- **Google Maps Platform** — Geocoding **$5.00/1k** (0–100k), Places Details $5.00, Dynamic
+  Maps $7.00, Aerial View Pro $16.00. **Each SKU now has its own free allowance (10k
+  Essentials / 5k Pro); the shared $200 credit is gone.** A 100k-request geocoding loop =
+  **$450**.
+- **Algolia** — Grow: 10k searches/mo, then **$0.50 per additional 1,000**. Grow Plus $1.75/1k.
+- **Cloudflare Workers** — $5/mo, 10M requests included, **+$0.30 per additional million**;
+  30M CPU-ms included, +$0.02 per million CPU-ms. A worker bound to the same queue as producer
+  and consumer is a documented runaway shape.
+- **Mixpanel and event analytics** — billed per event or per tracked user. Easy to miss because
+  it looks like telemetry, not spend. An unauthenticated endpoint that fires a `Track` per call
+  is a metered sink.
+- **BigQuery and scanned-bytes engines** — `LIMIT` does **not** limit bytes scanned. Two
+  separate documented incidents: $14,000 for 500 TB, and $10,000 in 22 seconds for 1,576 TB.
+
+---
+
+## Platform guardrails that already exist
+
+Flagging something the platform already stops is a false positive in practice. Check before
+reporting a self-triggering cycle:
+
+- **AWS Lambda recursive-loop detection** — on by default since Jul 2023, drops requests after
+  ~16 chained invocations; extended to Lambda↔S3 Oct 2024.
+- **Twilio error 14107** — loop filtering on inbound-to-outbound message cycles.
+
+These bound *cycles*. They do not bound a scheduler re-triggering the same work, which is the
+more common shape.

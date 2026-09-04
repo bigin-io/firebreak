@@ -1,0 +1,72 @@
+{
+  "name": "firebreak",
+  "description": "Firebreak — commit-time and PR-time cost review for Claude Code",
+  "owner": {
+    "name": "Tam Mai",
+    "email": "tam.mai@bigin.vn"
+  },
+  "plugins": [
+    {
+      "name": "firebreak",
+      "source": "./",
+      "description": "Reviews a change set for runaway cost and irreversible real-world harm — a metered operation reachable with no working upper bound — and reports in money rather than severity words. Three surfaces: the working tree before a commit, a branch or PR under review, and a headless CI gate. Carries a money-sink catalog of observed provider unit costs (Twilio, Stripe, Anthropic, OpenAI, SES/SendGrid, S3, Maps, Algolia, Cloudflare, Mixpanel) and a review method built from a real incident. Reports; never edits.",
+      "author": {
+        "name": "Tam Mai",
+        "email": "tam.mai@bigin.vn"
+      },
+      "homepage": "https://github.com/bigin-io/firebreak",
+      "repository": "https://github.com/bigin-io/firebreak",
+      "license": "MIT",
+      "keywords": [
+        "firebreak",
+        "cost-review",
+        "finops",
+        "runaway-cost",
+        "bill-shock",
+        "denial-of-wallet",
+        "blast-radius",
+        "spend-guardrail",
+        "metered-api",
+        "unit-cost",
+        "money-sink-catalog",
+        "code-review",
+        "change-review",
+        "diff-review",
+        "pre-commit",
+        "ci-gate",
+        "review-gate",
+        "baseline",
+        "fingerprint",
+        "idempotency",
+        "rate-limit",
+        "unbounded-loop",
+        "retry-storm",
+        "cron-storm",
+        "guardrail-regression",
+        "twilio",
+        "sms",
+        "stripe",
+        "payments",
+        "openai",
+        "anthropic",
+        "llm-cost",
+        "max-tokens",
+        "prompt-caching",
+        "ses",
+        "sendgrid",
+        "email",
+        "s3",
+        "egress",
+        "lambda",
+        "google-maps",
+        "geocoding",
+        "algolia",
+        "cloudflare-workers",
+        "mixpanel",
+        "bigquery",
+        "read-only",
+        "claude-code-plugin"
+      ]
+    }
+  ]
+}

@@ -7,6 +7,8 @@ burn money or cause irreversible real-world harm at scale before anyone notices?
 
 It reports in money rather than in severity words. **It reports; it never edits.**
 
+**v1.5.1** · MIT · [changelog](CHANGELOG.md)
+
 ## Install
 
 ```
